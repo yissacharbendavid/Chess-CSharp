@@ -20,7 +20,7 @@ namespace Chess
         public ChessGame()
         {
             board = new Board();
-            board.setNewGame();
+            board.setBoard();
             boardHistory = new string[50];
             resetBoardHistory();
         }
@@ -31,62 +31,62 @@ namespace Chess
             while (true)
             {
                 BoardHistoryIndex = addBoardToHistoryAndUpdateIndex(BoardHistoryIndex);
-                if (!isStartTurnLegal( "white"))
+                if (!isStartTurnLegal( true))
                     break;
-                if (!makeMoveOrTie("white"))
+                if (!makeMoveOrTie(true))
                     break;
                 Console.WriteLine(board);
                 BoardHistoryIndex = addBoardToHistoryAndUpdateIndex( BoardHistoryIndex);
-                if (!isStartTurnLegal( "black"))
+                if (!isStartTurnLegal(false))
                     break;
-                if (!makeMoveOrTie( "black"))
+                if (!makeMoveOrTie( false))
                     break;
                 Console.WriteLine(board);
             }
         }
-        bool isStartTurnLegal( string color)
+        bool isStartTurnLegal( bool isWhite)
         {
-            if (isCheckmate(color))
+            if (isCheckmate(isWhite))
             {
                 Console.WriteLine("Checkmate!!!");
                 return false;
             }
-            if (isStalemate(color))
+            if (isStalemate(isWhite))
             {
                 Console.WriteLine("It's a tie!");
                 return false;
             }
-            if (board.isCheck(color))
+            if (board.isCheck(isWhite))
                 Console.WriteLine("\nCheck!!!\n");
             return true;
         }
-        bool isStalemate(string color)
+        bool isStalemate(bool isWhite)
         {
-            if (!board.isPlayerHaveLegalMoves(color) || board.getMovesCountFor50MovesStalemate() == 50 || isBoardThreeTimesPlayed())
+            if (!board.isPlayerHaveLegalMoves(isWhite) || board.getMovesCountFor50MovesStalemate() == 50 || isBoardThreeTimesPlayed())
                 return true;
-            if (board.piecesCount(new Rook("e")) == 0 && board.piecesCount(new Pawn("e")) == 0 && board.piecesCount(new Queen("e")) == 0)
+            if (board.piecesCount(new Rook(true)) == 0 && board.piecesCount(new Pawn(true)) == 0 && board.piecesCount(new Queen(true)) == 0)
             {
-                if ((board.piecesCount(new Bishop("e")) < 2 && board.piecesCount(new Knight("e")) == 0) || (board.piecesCount(new Bishop("e")) == 0 && board.piecesCount(new Knight("e")) < 2))
+                if ((board.piecesCount(new Bishop(true)) < 2 && board.piecesCount(new Knight(true)) == 0) || (board.piecesCount(new Bishop(true)) == 0 && board.piecesCount(new Knight(true)) < 2))
                     return true;
-                if (board.piecesCount(new Bishop("e")) == 2 && board.piecesCount(new Knight("e")) == 0 && board.isBishopsOnSameColor())
+                if (board.piecesCount(new Bishop(true)) == 2 && board.piecesCount(new Knight(true)) == 0 && board.isBishopsOnSameColor())
                     return true;
             }
             return false;
         }
-        bool isCheckmate(string color)
+        bool isCheckmate(bool isWhite)
         {
-            if (board.isCheck(color) && !board.isPlayerHaveLegalMoves(color))
+            if (board.isCheck(isWhite) && !board.isPlayerHaveLegalMoves(isWhite))
                 return true;
             return false;
         }
-        bool makeMoveOrTie(string color)
+        bool makeMoveOrTie(bool isWhite)
         {
             string input;
             int currentFile, currentRank, moveToFile, moveToRank;
             bool movePlayed;
             do
             {
-                input = askForMove(color);
+                input = askForMove(isWhite);
                 while (input == "tie")
                 {
                     if (isTieApproved())
@@ -95,13 +95,13 @@ namespace Chess
                         return false;
                     }
                     else
-                        input = askForMove(color);
+                        input = askForMove(isWhite);
                 }
                 currentFile = convertLetterToNumber(input[0]);
                 currentRank = int.Parse("" + input[1]) - 1;
                 moveToFile = convertLetterToNumber(input[2]);
                 moveToRank = int.Parse("" + input[3]) - 1;
-                movePlayed = board.movePiece(currentFile, currentRank, moveToFile, moveToRank, color);
+                movePlayed = board.movePiece(currentFile, currentRank, moveToFile, moveToRank, isWhite);
                 if (!movePlayed)
                     Console.WriteLine("Illegal move. Try again.");
             } while (!movePlayed);
@@ -123,14 +123,14 @@ namespace Chess
                 input = Console.ReadLine().Trim();
             };
         }
-        string askForMove(string color)
+        string askForMove(bool isWhite)
         {
             bool isValid;
             string input;
             do
             {
                 isValid = true;
-                Console.WriteLine("Player " + color + ", please enter your move end press ENTER (current position and desired position), or tie to ask for tie.");
+                Console.WriteLine("Player " + (isWhite? "white":"black") + ", please enter your move end press ENTER (current position and desired position), or tie to ask for tie.");
                 input = Console.ReadLine().Trim();
                 if (input.Length != 4 && input.ToLower() != "tie")
                 {
@@ -223,40 +223,40 @@ namespace Chess
         {
             return board;
         }
-        public void setNewGame()
+        public void setBoard()
         {
-            this.board[0, 0] = new Rook("B");
-            this.board[0, 1] = new Knight("B");
-            this.board[0, 2] = new Bishop("B");
-            this.board[0, 3] = new Queen("B");
-            this.board[0, 4] = new King("B");
-            this.board[0, 5] = new Bishop("B");
-            this.board[0, 6] = new Knight("B");
-            this.board[0, 7] = new Rook("B");
-            this.board[1, 0] = new Pawn("B");
-            this.board[1, 1] = new Pawn("B");
-            this.board[1, 2] = new Pawn("B");
-            this.board[1, 3] = new Pawn("B");
-            this.board[1, 4] = new Pawn("B");
-            this.board[1, 5] = new Pawn("B");
-            this.board[1, 6] = new Pawn("B");
-            this.board[1, 7] = new Pawn("B");
-            this.board[6, 0] = new Pawn("W");
-            this.board[6, 1] = new Pawn("W");
-            this.board[6, 2] = new Pawn("W");
-            this.board[6, 3] = new Pawn("W");
-            this.board[6, 4] = new Pawn("W");
-            this.board[6, 5] = new Pawn("W");
-            this.board[6, 6] = new Pawn("W");
-            this.board[6, 7] = new Pawn("W");
-            this.board[7, 0] = new Rook("W");
-            this.board[7, 1] = new Knight("W");
-            this.board[7, 2] = new Bishop("W");
-            this.board[7, 3] = new Queen("W");
-            this.board[7, 4] = new King("W");
-            this.board[7, 5] = new Bishop("W");
-            this.board[7, 6] = new Knight("W");
-            this.board[7, 7] = new Rook("W");
+            this.board[0, 0] = new Rook(false);
+            this.board[0, 1] = new Knight(false);
+            this.board[0, 2] = new Bishop(false);
+            this.board[0, 3] = new Queen(false);
+            this.board[0, 4] = new King(false);
+            this.board[0, 5] = new Bishop(false);
+            this.board[0, 6] = new Knight(false);
+            this.board[0, 7] = new Rook(false);
+            this.board[1, 0] = new Pawn(false);
+            this.board[1, 1] = new Pawn(false);
+            this.board[1, 2] = new Pawn(false);
+            this.board[1, 3] = new Pawn(false);
+            this.board[1, 4] = new Pawn(false);
+            this.board[1, 5] = new Pawn(false);
+            this.board[1, 6] = new Pawn(false);
+            this.board[1, 7] = new Pawn(false);
+            this.board[6, 0] = new Pawn(true);
+            this.board[6, 1] = new Pawn(true);
+            this.board[6, 2] = new Pawn(true);
+            this.board[6, 3] = new Pawn(true);
+            this.board[6, 4] = new Pawn(true);
+            this.board[6, 5] = new Pawn(true);
+            this.board[6, 6] = new Pawn(true);
+            this.board[6, 7] = new Pawn(true);
+            this.board[7, 0] = new Rook(true);
+            this.board[7, 1] = new Knight(true);
+            this.board[7, 2] = new Bishop(true);
+            this.board[7, 3] = new Queen(true);
+            this.board[7, 4] = new King(true);
+            this.board[7, 5] = new Bishop(true);
+            this.board[7, 6] = new Knight(true);
+            this.board[7, 7] = new Rook(true);
             for (int file = 0; file < board.GetLength(0); file++)
                 for (int rank = 0; rank < board.GetLength(1); rank++)
                     if (board[file, rank] == null)
@@ -273,9 +273,9 @@ namespace Chess
         //            if (board[i, j] == null)
         //                board[i, j] = new EmptyPiece();
         //}
-        public bool movePiece(int currentRank, int currentFile, int moveToRank, int moveToFile, string color)
+        public bool movePiece(int currentRank, int currentFile, int moveToRank, int moveToFile, bool isWhite)
         {
-            if (board[currentFile, currentRank].isMoveLegal(this, currentRank, currentFile, moveToRank, moveToFile, color))
+            if (board[currentFile, currentRank].isMoveLegal(this, currentRank, currentFile, moveToRank, moveToFile, isWhite))
             {
                 if (board[currentFile,currentRank] is Pawn || !(board[moveToFile,moveToRank] is EmptyPiece))
                     movesCountFor50MovesStalemate = 0;
@@ -293,19 +293,19 @@ namespace Chess
                 }
                 if (board[moveToFile, moveToRank] is Pawn && (moveToFile == 0 || moveToFile == 7))
                     promotion(moveToFile, moveToRank);
-                cancelAllEnPassants(color);
+                cancelAllEnPassants(isWhite);
                 isWhiteTurn = !isWhiteTurn;
                 return true;
             }
             return false;
         }
-        public bool isCheck(string colorToTest)
+        public bool isCheck(bool isWhite)
         {
             int kingfile = -1, kingRank = -1;
             for (int rank = 0; rank < board.GetLength(0); rank++)
                 for (int file = 0; file < board.GetLength(1); file++)
                 {
-                    if (board[rank, file] is King && board[rank, file].getColor() == colorToTest)
+                    if (board[rank, file] is King && board[rank, file].getIsWhite() == isWhite)
                     {
                         kingfile = rank;
                         kingRank = file;
@@ -315,8 +315,8 @@ namespace Chess
                 return false;
             for (int rank = 0; rank < board.GetLength(0); rank++)
                 for (int file = 0; file < board.GetLength(1); file++)
-                    if (board[rank, file].getColor() != colorToTest)
-                        if (board[rank, file].isMoveLegal(this, file, rank, kingRank, kingfile, board[rank, file].getColor()))
+                    if (board[rank, file].getIsWhite() != isWhite)
+                        if (board[rank, file].isMoveLegal(this, file, rank, kingRank, kingfile, board[rank, file].getIsWhite()))
                             return true;
             return false;
 
@@ -335,13 +335,13 @@ namespace Chess
             return output;
 
         }
-        public void copyBoard(Board toCopy)
+        public void copyBoard(Board boardToCopy)
         {
             for (int file = 0; file < board.GetLength(0); file++)
                 for (int rank = 0; rank < board.GetLength(1); rank++)
-                    this.board[file, rank] = toCopy.board[file, rank];
-            movedRooksAndKings = toCopy.movedRooksAndKings;
-            isWhiteTurn = toCopy.isWhiteTurn;
+                    this.board[file, rank] = boardToCopy.board[file, rank];
+            movedRooksAndKings = boardToCopy.movedRooksAndKings;
+            isWhiteTurn = boardToCopy.isWhiteTurn;
         }
         public void promotion(int file, int rank)
         {
@@ -354,27 +354,27 @@ namespace Chess
                 isIpnutValid = true;
                 switch (input)
                 {
-                    case "q": board[file, rank] = new Queen(board[file, rank].getColor() == "white" ? "W" : "B"); break;
-                    case "n": board[file, rank] = new Knight(board[file, rank].getColor() == "white" ? "W" : "B"); break;
-                    case "r": board[file, rank] = new Rook(board[file, rank].getColor() == "white" ? "W" : "B"); break;
-                    case "b": board[file, rank] = new Bishop(board[file, rank].getColor() == "white" ? "W" : "B"); break;
+                    case "q": board[file, rank] = new Queen(board[file, rank].getIsWhite()? true : false); break;
+                    case "n": board[file, rank] = new Knight(board[file, rank].getIsWhite() ? true : false); break;
+                    case "r": board[file, rank] = new Rook(board[file, rank].getIsWhite() ? true : false); break;
+                    case "b": board[file, rank] = new Bishop(board[file, rank].getIsWhite() ? true : false); break;
                     default: Console.WriteLine("Invalid input. Try again."); isIpnutValid = false; break;
                 }
             }
         }
-        public bool isPlayerHaveLegalMoves(string color)
+        public bool isPlayerHaveLegalMoves(bool isWhite)
         {
             for (int file = 0; file < board.GetLength(0); file++)
                 for (int rank = 0; rank < board.GetLength(1); rank++)
-                    if (board[file, rank].getColor() == color && board[file, rank].isHaveLegalMove(this, file, rank))
+                    if (board[file, rank].getIsWhite() == isWhite && board[file, rank].isHaveLegalMove(this, file, rank))
                         return true;
             return false;
         }
-        public void cancelAllEnPassants(string color)
+        public void cancelAllEnPassants(bool isWhite)
         {
             for (int file = 0; file < board.GetLength(0); file++)
                 for (int rank = 0; rank < board.GetLength(1); rank++)
-                    if (board[file, rank].getColor() == color && board[file, rank] is Pawn)
+                    if (board[file, rank].getIsWhite() == isWhite && board[file, rank] is Pawn)
                     {
                         Pawn pawn = (Pawn)board[file, rank];
                         pawn.setCanEnpassant(false);
@@ -433,36 +433,33 @@ namespace Chess
     class Piece
     {
         protected bool isMoved;
-        string color;
+        bool isWhite;
         char type;
-        public Piece(char type, string color)
+        public Piece(char type, bool isWhite)
         {
             this.type = type;
-            this.color = color;
+            this.isWhite = isWhite;
             isMoved = false;
         }
         public void setIsMoved()
             { this.isMoved = true; }
         public bool getIsMoved()
             { return isMoved; }
-        public string getColor()
-        {
-            if (color.ToUpper() == "W")
-                return "white";
-            if (color.ToUpper() == "B")
-                return "black";
-            return color; 
-        }
+        public bool getIsWhite()
+        { return isWhite; }
         public override string ToString()
         {
-            return color.ToUpper() + Char.ToUpper(type);
+            return (isWhite?"W":"B") + Char.ToUpper(type);
         }
-        public virtual bool isMoveLegal(Board gameboard, int currentFile, int currentRank, int moveToFile, int moveToRank, string color)
+        public virtual bool isMoveLegal(Board gameboard, int currentFile, int currentRank, int moveToFile, int moveToRank, bool isWhite)
         {
             Piece[,] board = gameboard.getBoard();
-            if (board[moveToRank, moveToFile].getColor() == color || color != board[currentRank, currentFile].getColor())
+            if (!(board[moveToRank, moveToFile] is EmptyPiece))
+                if (board[moveToRank, moveToFile].getIsWhite() == isWhite)
+                    return false;
+            if (isWhite != board[currentRank, currentFile].getIsWhite())
                 return false;
-            if (board[currentRank, currentFile] is EmptyPiece)
+                    if (board[currentRank, currentFile] is EmptyPiece)
                 return false;
             if (currentRank == moveToRank && currentFile == moveToFile)
                 return false;
@@ -471,9 +468,9 @@ namespace Chess
             copy.copyBoard(gameboard);
             boardCopy[moveToRank, moveToFile] = boardCopy[currentRank, currentFile];
             boardCopy[currentRank, currentFile] = new EmptyPiece();
-            if (copy.isCheck(board[currentRank, currentFile].getColor()))
+            if (copy.isCheck(board[currentRank, currentFile].getIsWhite()))
             {
-                if (copy.piecesCount(new King("e")) != 2)
+                if (copy.piecesCount(new King(true)) != 2)
                     return true;
                 return false;
             }
@@ -484,7 +481,7 @@ namespace Chess
             Piece[,] board = gameboard.getBoard();
             for(int file = 0; file < board.GetLength(0); file++)
                 for(int rank = 0; rank < board.GetLength(1); rank++)
-                    if(isMoveLegal(gameboard,currentRank,currentFile,file,rank,board[currentFile,currentRank].getColor()))
+                    if(isMoveLegal(gameboard,currentRank,currentFile,file,rank,board[currentFile,currentRank].getIsWhite()))
                         return true;
             return false;
         }
@@ -494,10 +491,10 @@ namespace Chess
     class Pawn : Piece
     {
         bool canEnPassant;
-        public Pawn(string color):base ('p',color) { }
-        public override bool isMoveLegal(Board gameBoard, int currentFile, int currentRank, int moveToFile, int moveToRank, string color)
+        public Pawn(bool isWhite):base ('p',isWhite) { }
+        public override bool isMoveLegal(Board gameBoard, int currentFile, int currentRank, int moveToFile, int moveToRank, bool isWhite)
         {
-            if (!base.isMoveLegal(gameBoard, currentFile, currentRank, moveToFile, moveToRank, color))
+            if (!base.isMoveLegal(gameBoard, currentFile, currentRank, moveToFile, moveToRank, isWhite))
                 return false;
             if (!isDirectionLegal(currentRank,moveToRank) )
                 return false;
@@ -529,7 +526,7 @@ namespace Chess
         }
         public bool isDirectionLegal(int currentRank,  int moveToRank)
         {
-            if (getColor() == "white")
+            if (getIsWhite())
             {
                 if (currentRank < moveToRank)
                     return false;
@@ -546,13 +543,13 @@ namespace Chess
         {
             Piece[,] board = gameBoard.getBoard();
             if (moveToRank != 7)
-                if (board[moveToFile, moveToRank + 1] is Pawn && board[moveToFile, moveToRank + 1].getColor() != getColor())
+                if (board[moveToFile, moveToRank + 1] is Pawn && board[moveToFile, moveToRank + 1].getIsWhite() != getIsWhite())
                 {
                     Pawn pawn = (Pawn)board[moveToFile, moveToRank + 1];
                     pawn.setCanEnpassant(true);
                 }
             if (moveToRank != 0)
-                if (board[moveToFile, moveToRank - 1] is Pawn && board[moveToFile, moveToRank - 1].getColor() != getColor())
+                if (board[moveToFile, moveToRank - 1] is Pawn && board[moveToFile, moveToRank - 1].getIsWhite() != getIsWhite())
                 {
                     Pawn pawn = (Pawn)board[moveToFile, moveToRank - 1];
                     pawn.setCanEnpassant(true);
@@ -561,10 +558,10 @@ namespace Chess
     }
     class Rook: Piece
     {
-        public Rook(string color) : base('r', color) { }
-        public override bool isMoveLegal(Board gameBoard, int currentFile, int currentRank, int moveToFile, int moveToRank, string color)
+        public Rook(bool isWhite) : base('r', isWhite) { }
+        public override bool isMoveLegal(Board gameBoard, int currentFile, int currentRank, int moveToFile, int moveToRank, bool isWhite)
         {
-            if (!base.isMoveLegal(gameBoard, currentFile, currentRank, moveToFile, moveToRank, color))
+            if (!base.isMoveLegal(gameBoard, currentFile, currentRank, moveToFile, moveToRank, isWhite))
                 return false;
             if (moveToRank != currentRank && moveToFile != currentFile)
                 return false;
@@ -613,10 +610,10 @@ namespace Chess
     }
     class Knight : Piece
     {
-        public Knight(string color) : base('n', color) { }
-        public override bool isMoveLegal(Board gameBoard, int currentFile, int currentRank, int moveToFile, int moveToRank, string color)
+        public Knight(bool isWhite) : base('n', isWhite) { }
+        public override bool isMoveLegal(Board gameBoard, int currentFile, int currentRank, int moveToFile, int moveToRank, bool isWhite)
         {
-            if (!base.isMoveLegal(gameBoard, currentFile, currentRank, moveToFile, moveToRank, color))
+            if (!base.isMoveLegal(gameBoard, currentFile, currentRank, moveToFile, moveToRank, isWhite))
                 return false;
             if (currentRank - moveToRank == 2 || moveToRank - currentRank == 2)
                 if (currentFile - moveToFile == 1 || moveToFile - currentFile == 1)
@@ -629,10 +626,10 @@ namespace Chess
     }
     class Queen : Piece
     {
-        public Queen(string color) : base('q', color) { }
-        public override bool isMoveLegal(Board gameBoard, int currentFile, int currentRank, int moveToFile, int moveToRank, string color)
+        public Queen(bool isWhite) : base('q', isWhite) { }
+        public override bool isMoveLegal(Board gameBoard, int currentFile, int currentRank, int moveToFile, int moveToRank, bool isWhite)
         {
-            if (base.isMoveLegal(gameBoard, currentFile, currentRank, moveToFile, moveToRank, color) &&
+            if (base.isMoveLegal(gameBoard, currentFile, currentRank, moveToFile, moveToRank, isWhite) &&
                 ( canMoveLikeRook(gameBoard, currentFile, currentRank, moveToFile, moveToRank)|| canMoveLikeBishop(gameBoard, currentFile, currentRank, moveToFile, moveToRank)))
                 return true;
             return false;          
@@ -706,11 +703,11 @@ namespace Chess
     }
     class King : Piece
     {
-        public King(string color) : base('k', color) { }
-        public override bool isMoveLegal(Board gameboard, int currentFile, int currentRank, int moveToFile, int moveToRank, string color)
+        public King(bool isWhite) : base('k', isWhite) { }
+        public override bool isMoveLegal(Board gameboard, int currentFile, int currentRank, int moveToFile, int moveToRank, bool isWhite)
         {
             bool isLegal = true;
-            if(! base.isMoveLegal(gameboard, currentFile, currentRank, moveToFile, moveToRank, color))
+            if(! base.isMoveLegal(gameboard, currentFile, currentRank, moveToFile, moveToRank, isWhite))
                 isLegal =  false;
             if (isMoved == false && (moveToFile == 6 || moveToFile == 2) && (currentRank == 0 || currentRank == 7) && distance(moveToFile,currentFile) > 1)
             {
@@ -727,24 +724,24 @@ namespace Chess
             Board copy = new Board();
             copy.copyBoard(gameboard);
             if (moveToFile == 6)
-                if (!board[currentRank,7].getIsMoved() && !gameboard.isCheck(getColor()))
-                    if (isMoveLegal(gameboard,4, currentRank,5, moveToRank, getColor()))
+                if (!board[currentRank,7].getIsMoved() && !gameboard.isCheck(getIsWhite()))
+                    if (isMoveLegal(gameboard,4, currentRank,5, moveToRank, getIsWhite()))
                     {
-                        copy.movePiece(4, currentRank, 5, moveToRank, getColor());
-                        if (isMoveLegal(copy, 5, currentRank, 6, moveToRank, getColor()))
+                        copy.movePiece(4, currentRank, 5, moveToRank, getIsWhite());
+                        if (isMoveLegal(copy, 5, currentRank, 6, moveToRank, getIsWhite()))
                         {
-                            gameboard.movePiece(7, currentRank, 5, currentRank,getColor());
+                            gameboard.movePiece(7, currentRank, 5, currentRank,getIsWhite());
                             return true;
                         }
                     }
             if (moveToFile == 2)
-                if (!board[currentRank,0].getIsMoved() && !gameboard.isCheck(getColor()))
-                    if (isMoveLegal(gameboard, 4, currentRank, 3, moveToRank, getColor()))
+                if (!board[currentRank,0].getIsMoved() && !gameboard.isCheck(getIsWhite()))
+                    if (isMoveLegal(gameboard, 4, currentRank, 3, moveToRank, getIsWhite()))
                     {
-                        copy.movePiece(4, currentRank, 3, moveToRank, getColor());
-                        if (isMoveLegal(copy, 3, currentRank, 2, moveToRank, getColor()))
+                        copy.movePiece(4, currentRank, 3, moveToRank, getIsWhite());
+                        if (isMoveLegal(copy, 3, currentRank, 2, moveToRank, getIsWhite()))
                         {
-                            gameboard.movePiece(0, currentRank, 3, currentRank, getColor());
+                            gameboard.movePiece(0, currentRank, 3, currentRank, getIsWhite());
                             return true;
                         }
                     }
@@ -753,11 +750,10 @@ namespace Chess
     }
     class Bishop : Piece
     {
-        public Bishop(string color) : base('b', color)
-        { }
-        public override bool isMoveLegal(Board gameBoard, int currentFile, int currentRank, int moveToFile, int moveToRank, string color)
+        public Bishop(bool isWhite) : base('b', isWhite) { }
+        public override bool isMoveLegal(Board gameBoard, int currentFile, int currentRank, int moveToFile, int moveToRank, bool isWhite)
         {
-            if (!base.isMoveLegal(gameBoard, currentFile, currentRank, moveToFile, moveToRank, color))
+            if (!base.isMoveLegal(gameBoard, currentFile, currentRank, moveToFile, moveToRank, isWhite))
                 return false;
             Piece[,] board = gameBoard.getBoard();
             if (distance(currentFile, moveToFile) != distance(currentRank, moveToRank))
@@ -780,9 +776,7 @@ namespace Chess
     }
     class EmptyPiece:Piece
     {
-        public EmptyPiece():base('e',"empty") { isMoved = true; }
+        public EmptyPiece():base('e', true) { isMoved = true; }
         public override string ToString() { return "--"; }
     }
 }
-
-// fkjsd;lfkjads
